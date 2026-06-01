@@ -1,7 +1,7 @@
 import express from 'express';
 import Redis from 'ioredis';
 
-const ap = express();
+const app = express();
 app.use(express.json());
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -13,4 +13,25 @@ app.post('/otp', async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a random 6-digit OTP
     await redis.set(otpKey(phone), otp, 'EX', 30); // Set OTP with TTL of 30 sec
     res.json({ otp });
+});
+
+app.post('/otp/verify', async (req, res) => {
+    const { phone, otp } = req.body;
+    const storedOtp = await redis.get(otpKey(phone));
+    if(!storedOtp){
+        return res.status(400).json({ message: 'OTP expired or not found' });
+    }
+    if(storedOtp !== otp){
+        return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    await redis.del(otpKey(phone)); // Delete OTP after successful verification
+    res.json({ message: 'OTP verified successfully' });
+});
+
+app.get('/otp/:phone/ttl', async (req, res) => {
+    const ttl = await redis.ttl(otpKey(req.params.phone));
+    res.json({ttl});
+});
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
 });
