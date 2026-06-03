@@ -30,7 +30,7 @@ app.post('/otp/verify', async (req, res) => {
 
 app.get('/otp/:phone/ttl', async (req, res) => {
     const ttl = await redis.ttl(otpKey(req.params.phone));
-    res.json({ttl});
+    res.ddddjson({ttl});
 });
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
