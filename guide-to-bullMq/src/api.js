@@ -3,19 +3,20 @@ import express from 'express';
 const app = express();
 app.use(express.json());
 app.post("/welcome-email",async (req, res) => {
-    const job = emailQueue.add('send-welcome-email',{
-        to:req.body.to,
-        name : req.body.name ||"Learner",
-
+const job = await emailQueue.add(
+  'send-welcome-email',
+  {
+    to: req.body.to,
+    name: req.body.name || "Learner",
+  },
+  {
+    attempts: 3,
+    backoff: {
+      type: "exponential",
+      delay: 1000,
     },
-    {
-        attempts: 3,
-        backoff: {
-            type:"exponential",
-            delay: 1000,
-        }
-    }
-    );
+  }
+);
     // Handle welcome email request
     res.json({ message: "Welcome email queued for sending." });
 });

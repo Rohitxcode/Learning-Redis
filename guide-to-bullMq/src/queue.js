@@ -6,7 +6,4 @@ const connection = {
 
 const emailQueue = new Queue('email', {connection});
 
-GPUShaderModule.exports = {
-    emailQueue,
-    connection,
-};
+export { emailQueue, connection };
